@@ -1,0 +1,13 @@
+# CIELO merger-tree cleaning pipeline — Python dependencies
+# Install with: pip install -r requirements.txt
+# Tested on Python 3.10 / 3.11
+
+numpy>=1.24
+pandas>=2.0
+scipy>=1.10
+h5py>=3.8
+networkx>=3.1
+astropy>=5.3
+tqdm>=4.65
+matplotlib>=3.7
+seaborn>=0.12
