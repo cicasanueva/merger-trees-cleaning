@@ -252,7 +252,7 @@ depura_mergers_trees(sim_name, gxid, snap_z0)
 
 ## Example results
 
-Results are shown for the six central galaxies of the CIELO sample used in Casanueva-Villarreal et al. (in prep.), following the simulation naming convention of Tissera et al. (2025). Counts refer to individual subhalo infall events detected at each stage.
+To illustrate the pipeline's performance, results are shown for the subset of 6 central galaxy case studies analyzed in Casanueva-Villarreal et al. (in prep.), following the simulation naming convention of Tissera et al. (2025). Counts refer to individual subhalo infall events detected at each stage.
 
 ### Pipeline throughput
 
@@ -272,7 +272,7 @@ The reduction from Step 3 to Step 4 reflects two sequential filters: removal of 
 
 Distribution of baryonic mass ratios across the 685 entries in the clean catalogue (all six galaxies combined):
 
-![Baryonic Mass Ratio Distribution](assets/mub_distribution.png)
+![Baryonic Mass Ratio Distribution](assets/mub_distribution_v4.png)
 
 | μ_b range | N | Fraction |
 |-----------|--:|--------:|
