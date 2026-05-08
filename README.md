@@ -27,9 +27,9 @@ Relying solely on the raw merger branches provided by structure finders (like AH
 
 ![Orbital Trajectories of Merger Groups](assets/orbit_diagram_v9.png)
 
-- **Case B (Lost Tracking):** The structure finder reports the satellite as merging directly with the central. However, physical tracking shows the object disappeared before entering $R_{200}$. Since Step 2 filters for the central's main branch, this case exposes when AHF loses track of a halo (due to numerical noise or disruption) and incorrectly ties its "death" directly to the central's tree, even though it was far outside the virial radius.
-- **Case A (Spurious Fragmentation):** The tree shows an entire branch merging. Physical tracking reveals the object was born *inside* $R_{200}$—often an artificial numerical fragmentation of the central galaxy itself that the finder split by mistake and later merged back.
-- **Case C (True Mergers):** The canonical physical merger. Born in the cosmic web, crosses $R_{200}$, and falls into the central galaxy.
+- **Case A (Spurious Fragmentation):** The structure finder tree shows an entire branch merging into the central. However, physical tracking reveals the object was actually born *inside* $R_{200}$. This is often an artificial numerical fragmentation of the central galaxy itself, which the finder mistakenly split into a separate subhalo only to merge it back later.
+- **Case B (Lost Tracking):** The structure finder reports the satellite as merging directly with the central. Conversely, physical tracking shows the object was disrupted or lost before ever entering $R_{200}$. This exposes instances where the finder loses track of a halo (due to numerical noise or physical disruption) and incorrectly ties its "death" directly to the central's main branch, despite the event occurring far outside the virial radius.
+- **Case C (True Mergers):** The canonical physical merger. The object is born in the cosmic web, crosses $R_{200}$ from the outside in, and ultimately falls into the central galaxy.
 
 By analyzing the particle-ID overlaps at the exact infall moment, this algorithm identifies these tracking discrepancies and removes physically redundant entries.
 
