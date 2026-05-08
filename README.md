@@ -200,14 +200,9 @@ See `requirements.txt` for exact versions.
 
 This pipeline is designed to process raw HDF5 snapshots from the CIELO cosmological simulations. The merger tree must be in AMIGA multiline adjacency list format. Input paths are configured via `src/config.py`.
 
-It is crucial to note that CIELO raw data is stored in **cosmological code units** (comoving, $h$-scaled). The physical units are self-contained within the HDF5 file metadata. 
+It is crucial to note that the code explicitly assumes the input HDF5 files are in **cosmological code units** (specifically those used by the CIELO simulation). 
 
-For any dataset (e.g., `Mass`, `Coordinates`), you can dynamically extract its physical meaning by reading its `.attrs`:
-- `description_units`: Human-readable unit (e.g., `10^10 Msun / h`).
-- `cgs_conversion_factor`: Multiplier to convert the raw array to CGS units.
-- `a_exp` and `h_exp`: Exponents for the cosmological scale factor ($a$) and the Hubble parameter ($h$) required to convert comoving values to physical values.
-
-This pipeline automatically handles or assumes these raw CIELO unit structures during the merger tree cleaning process. If adapting this code for other simulations (e.g., EAGLE, Illustris), ensure your input catalogues match this $h$-scaled comoving unit scheme.
+For a detailed list of the exact physical variables and the internal units assumed by the Python scripts, please see [UNITS.md](UNITS.md).
 
 For detailed column-by-column descriptions of all output files, see [SCHEMA.md](SCHEMA.md).
 
