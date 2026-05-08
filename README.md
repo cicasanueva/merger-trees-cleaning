@@ -316,7 +316,7 @@ The overlap-based cleaning algorithm in Step 4 identifies these pairs through pa
 
 ## Papers using this pipeline
 
-- Casanueva-Villarreal, C., et al., in prep., *Evolution of angular momentum in the CIELO simulations. I. Temporal evolution of gas–stellar misalignments and their merger context*
+- Casanueva-Villarreal, C., et al., in prep., *Evolution of angular momentum in the CIELO simulations. Temporal evolution of gas--stellar misalignments and baryonic merger timing*
 
 If you use this pipeline in your work, please cite the software record:
 
