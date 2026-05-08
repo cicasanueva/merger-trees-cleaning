@@ -17,7 +17,24 @@
 
 This repository contains a Python pipeline to detect, characterize, and clean merger trees for central galaxies in cosmological zoom-in simulations. It is designed to work with simulations based on the GADGET-3 N-body/SPH code that use the AMIGA Halo Finder (AHF; Knollmann & Knebe 2009) merger tree format.
 
-The main goal of the pipeline is to produce a physically consistent, duplicate-free catalogue of baryonic merger events for each central galaxy. The key contribution is the **overlap-based cleaning algorithm** (Step 4), which classifies each merger according to its orbital history and mass-transfer efficiency, then applies eight sequential particle-ID overlap filters to consolidate spurious tree entries arising from the fragmentation of single infalling objects into multiple subhaloes by the structure finder.
+The main goal of the pipeline is to produce a physically consistent, duplicate-free catalogue of baryonic merger events for each central galaxy. 
+
+## Step 4: Overlap-based Cleaning Algorithm
+
+### Why is overlap-based cleaning necessary?
+
+Relying solely on the raw merger branches provided by structure finders (like AHF or SUBFIND) can be incomplete or subject to numerical artifacts. While the raw trees report all objects as direct mergers into the central galaxy, tracking the actual particles snapshot-by-snapshot reveals a different reality:
+
+![Orbital Trajectories of Merger Groups](assets/orbit_diagram_v9.png)
+
+- **Case B (Lost Tracking):** The structure finder reports the satellite as merging directly with the central. However, physical tracking shows the object disappeared before entering $R_{200}$. Since Step 2 filters for the central's main branch, this case exposes when AHF loses track of a halo (due to numerical noise or disruption) and incorrectly ties its "death" directly to the central's tree, even though it was far outside the virial radius.
+- **Case A (Spurious Fragmentation):** The tree shows an entire branch merging. Physical tracking reveals the object was born *inside* $R_{200}$—often an artificial numerical fragmentation of the central galaxy itself that the finder split by mistake and later merged back.
+- **Case C (True Mergers):** The canonical physical merger. Born in the cosmic web, crosses $R_{200}$, and falls into the central galaxy.
+
+By analyzing the particle-ID overlaps at the exact infall moment, this algorithm identifies these tracking discrepancies and removes physically redundant entries.
+
+### The Algorithm Steps
+The key contribution is the **overlap-based cleaning algorithm**, which classifies each merger according to its orbital history and mass-transfer efficiency, then applies sequential particle-ID overlap filters to consolidate spurious tree entries arising from the fragmentation of single infalling objects into multiple subhaloes by the structure finder.
 
 ---
 
@@ -118,14 +135,16 @@ The transfer threshold is 10% for all mass-fraction columns (`Mstell_frac`, `Mga
 
 For every merger, the particle IDs of all gas (PartType0), stellar (PartType4), and dark matter (PartType1) particles belonging to the satellite subhalo at t_infall are loaded from the HDF5. This particle catalogue is the basis for overlap detection.
 
-#### Overlap graph construction
+#### Identifying Physically Redundant Entries via Particle-ID Overlap
 
-For each pair of mergers (A, B) at the same infall snapshot, the overlap is evaluated as follows:
-1. The **dominant component** (the one with the largest mass at infall: stars, gas, or DM) is identified for merger A.
-2. A strong overlap is declared if ≥ 90% of merger A's dominant-component particles also belong to merger B.
-3. If a secondary component of merger A contains > 100 particles, that component must also overlap merger B at ≥ 50%.
+Structure finders sometimes fragment a single coherent infalling object into multiple subhaloes, or incorrectly track sub-structures as independent events. If these entries are treated independently, the pipeline would overestimate both the number of discrete mergers and their accumulated accreted mass.
 
-Pairs satisfying these criteria are connected as edges in a NetworkX overlap graph. Connected components of this graph form groups of physically redundant merger events.
+To identify and consolidate these redundant entries, the pipeline leverages the raw `ParticleIDs` of the satellites at their infall snapshot. For each pair of mergers (A, B) at the same infall snapshot:
+1. The **dominant component** (stars, gas, or dark matter) is identified for merger A based on mass.
+2. A strong overlap is established if ≥ 90% of merger A's dominant-component particles are shared with merger B.
+3. If a secondary component of merger A contains > 100 particles, it must also share ≥ 50% of its particles with merger B.
+
+Pairs satisfying these criteria are connected in a NetworkX overlap graph. Connected components of this graph reveal which catalogue entries are physically redundant, allowing the algorithm to consolidate them into a single physical accretion event.
 
 #### Filter 1 — C2-conservancy (C2 starts the group)
 
@@ -239,19 +258,21 @@ Results are shown for the six central galaxies of the CIELO sample used in Casan
 
 | Galaxy | Tree events (Step 2) | With baryons (Step 3) | Clean catalogue (Step 4) | Removed (%) |
 |--------|---------------------:|----------------------:|-------------------------:|------------:|
-| LG1-gx4337 |  866 |  383 | 178 | 54% |
-| P3-gx298   |   26 |   17 |  10 | 41% |
-| P4-gx18    |  104 |   48 |  29 | 40% |
-| P4-gx428   |  249 |  100 |  57 | 43% |
-| P4-gx1258  |   50 |   30 |  20 | 33% |
-| P7-gx2389  | 2513 | 1027 | 391 | 62% |
-| **Total**  | **3808** | **1605** | **685** | **57%** |
+| LG1-gx4337 |  866 |  383 | 178 | 53.5% |
+| P3-gx298   |   26 |   17 |  10 | 41.2% |
+| P4-gx18    |  104 |   48 |  29 | 39.6% |
+| P4-gx428   |  249 |  100 |  57 | 43.0% |
+| P4-gx1258  |   50 |   30 |  20 | 33.3% |
+| P7-gx2389  | 2513 | 1027 | 391 | 61.9% |
+| **Total**  | **3808** | **1605** | **685** | **57.3%** |
 
 The reduction from Step 3 to Step 4 reflects two sequential filters: removal of low mass-transfer events (baryonic mass fraction transferred to the central by z = 0 below 10%) and the overlap-based cleaning algorithm that consolidates spurious duplicate entries caused by structure-finder fragmentation.
 
 ### Baryonic mass ratio (μ_b) distribution — clean catalogue
 
 Distribution of baryonic mass ratios across the 685 entries in the clean catalogue (all six galaxies combined):
+
+![Baryonic Mass Ratio Distribution](assets/mub_distribution.png)
 
 | μ_b range | N | Fraction |
 |-----------|--:|--------:|
@@ -262,7 +283,15 @@ Distribution of baryonic mass ratios across the 685 entries in the clean catalog
 | 0.30–1.00 |   4 |  0.6% |
 | > 1.00    |   1 |  0.1% |
 
-Median μ_b = 0.0002; 90th percentile = 0.016; maximum = 2.14. The strongly skewed distribution reflects the dominance of minor and micro-merger events in the histories of these galaxies.
+The median $\mu_b$ is heavily skewed because $87\%$ of all retained mergers are micro-mergers ($\mu_b < 0.01$). This is consistent with the continuous minor-merger accretion history expected for central galaxies in cosmological simulations.
+
+### Mass of Eliminated vs Retained Mergers
+
+While the overlap and tracking filters eliminate a significant number of events, they predominantly remove very low-mass structural fragments. As shown in the baryonic mass distribution evaluated at infall (or at first/last detection for satellites born inside or disrupted outside $R_{200}$), the pipeline almost exclusively flags and deletes objects with $M_{\rm baryon} < 10^8 \ M_\odot$. 
+
+Crucially, the rare intermediate-to-high mass events ($> 10^8 \ M_\odot$) that are flagged for removal typically correspond to satellite–satellite mergers occurring within the halo. In these cases, the pipeline removes the object as an independent catalogue entry to prevent double-counting, but its baryonic mass is fully conserved and analytically integrated into the primary satellite that absorbed it (via Filter 5). This ensures that no physical mass from significant accretion events is artificially lost during the cleaning process.
+
+![Retained vs Eliminated Mass](assets/mass_eliminated_v4.png)
 
 ### Satellites with no detected R₂₀₀ crossing (A-group)
 
