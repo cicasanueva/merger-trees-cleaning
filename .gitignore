@@ -1,0 +1,16 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac OS
+.DS_Store
+
+# Data files (Do not upload large catalogues)
+*.hdf5
+*.dat
+*.csv
+*.txt
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
